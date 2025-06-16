@@ -1,0 +1,57 @@
+---
+- name: Initialize Fedora Workstation
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: Set Fedora version variable
+      set_fact:
+        fedora_version: "{{ ansible_distribution_version }}"
+
+    # install nvidia drivers
+    # https://rpmfusion.org/Configuration
+    # https://idroot.us/install-nvidia-drivers-fedora-42/
+    - name: Install Free and Nonfree Repositories for RPM Fusion
+      dnf:
+        name: 
+          - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ fedora_version }}.noarch.rpm 
+          - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ fedora_version }}.noarch.rpm
+        state: present
+
+    - name: Install NVIDIA drivers
+      dnf:
+        name:
+          - akmod-nvidia
+          - xorg-x11-drv-nvidia-cuda
+          - xorg-x11-drv-nvidia-power # for suspend
+        state: present
+
+    - name: Enable nvidia-{suspend,resume,hibernate} services
+      ansible.builtin.systemd:
+        name: "nvidia-{{ item }}.service"
+        enabled: yes
+      loop:
+        - suspend
+        - resume
+        - hibernate
+    
+    # install spotify
+    - name: Install spotify with snap
+      community.general.snap:
+        name: spotify
+
+    # install vscode
+    - name: Ensure /snap symlink exists
+      ansible.builtin.file:
+        src: /var/lib/snapd/snap
+        dest: /snap
+        state: link
+        
+    - name: Install vscode with snap
+      community.general.snap:
+        name: code
+        classic: true
+ 
+
+
+
