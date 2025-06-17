@@ -35,29 +35,37 @@
         - resume
         - hibernate
     
-    # install spotify
-    - name: Install spotify with snap
-      community.general.snap:
-        name: spotify
-
-    # install vscode
-    - name: Ensure /snap symlink exists
-      ansible.builtin.file:
-        src: /var/lib/snapd/snap
-        dest: /snap
-        state: link
-        
-    - name: Install vscode with snap
-      community.general.snap:
-        name: code
-        classic: true
-  
-    # install dnf applications
-    - name: Install applications with dnf
-      dnf:
-        name:
-          - mpv
+    # install vscode (dnf)
+    - name: Add Microsoft GPG key
+      rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
         state: present
+
+    - name: Add VS Code repository
+      copy:
+        dest: /etc/yum.repos.d/vscode.repo
+        content: |
+          [code]
+          name=Visual Studio Code
+          baseurl=https://packages.microsoft.com/yumrepos/vscode
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Install Visual Studio Code
+      dnf:
+        name: code
+        state: present
+    
+    # install flatpaks
+    - name: Install applications with flatpak
+      community.general.flatpak:
+        name: 
+          - com.spotify.Client
+          - io.github.celluloid_player.Celluloid
+          - com.github.tchx84.Flatseal
+        state: present
+        
 
 
  
