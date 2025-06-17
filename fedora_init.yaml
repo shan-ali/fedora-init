@@ -51,6 +51,15 @@
       community.general.snap:
         name: code
         classic: true
+  
+    # install dnf applications
+    - name: Install applications with dnf
+      dnf:
+        name:
+          - mpv
+        state: present
+
+
  
 
 
