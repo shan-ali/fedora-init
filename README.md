@@ -4,7 +4,6 @@
 
 ```
 sudo dnf -y update
-sudo dnf -y install snapd ansible
 ```
 
 # reboot the system
