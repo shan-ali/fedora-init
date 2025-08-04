@@ -82,6 +82,13 @@
       dnf:
         name: code
         state: present
+
+    - name: Add the Flathub flatpak remote (system-wide)
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: system
     
     # install flatpaks
     - name: Install applications with flatpak
