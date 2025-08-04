@@ -43,6 +43,7 @@
         name:
           # - exiftool
           # dev tools
+          - android-tools
           - gcc
           - make
           - zlib-devel
