@@ -59,6 +59,9 @@
           - findutils
           - tk-devel
           - libuuid-devel
+          # others
+          - nvtop
+          - gnome-tweaks
         state: present
     
     # install vscode (dnf)
@@ -98,6 +101,7 @@
           - org.gimp.GIMP
           - io.mpv.Mpv
           - com.github.tchx84.Flatseal
+          - org.gnome.Extensions
         state: present
     
     # install pyenv
