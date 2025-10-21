@@ -10,9 +10,7 @@
       set_fact:
         fedora_version: "{{ ansible_distribution_version }}"
 
-    # install nvidia drivers
-    # https://rpmfusion.org/Configuration
-    # https://idroot.us/install-nvidia-drivers-fedora-42/
+    # https://rpmfusion.org/Configuration    
     - name: Install Free and Nonfree Repositories for RPM Fusion
       dnf:
         name: 
@@ -20,6 +18,8 @@
           - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ fedora_version }}.noarch.rpm
         state: present
 
+    # install nvidia drivers
+    # https://idroot.us/install-nvidia-drivers-fedora-42/
     - name: Install NVIDIA drivers
       dnf:
         name:
@@ -36,6 +36,18 @@
         - suspend
         - resume
         - hibernate
+
+    # install codecs
+    # https://rpmfusion.org/Howto/Multimedia
+    - name: Swap ffmpeg-free with ffmpeg
+      ansible.builtin.command:
+        cmd: dnf swap ffmpeg-free ffmpeg --allowerasing -y
+      become: true
+
+    - name: Update multimedia group without weak deps and excluding PackageKit-gstreamer-plugin
+      ansible.builtin.command:
+        cmd: dnf update @multimedia --setopt=install_weak_deps=False --exclude=PackageKit-gstreamer-plugin -y
+      become: true
 
     # install packages (dnf)
     - name: Install packages with dnf
@@ -62,6 +74,7 @@
           # others
           - nvtop
           - gnome-tweaks
+          - libva-nvidia-driver # hardware accelerated codec
         state: present
     
     # install vscode (dnf)
