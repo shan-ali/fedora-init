@@ -26,6 +26,7 @@
           - akmod-nvidia
           - xorg-x11-drv-nvidia-cuda
           - xorg-x11-drv-nvidia-power # for suspend
+          - libva-nvidia-driver # hardware accelerated codec
         state: present
 
     - name: Enable nvidia-{suspend,resume,hibernate} services
@@ -74,7 +75,6 @@
           # others
           - nvtop
           - gnome-tweaks
-          - libva-nvidia-driver # hardware accelerated codec
         state: present
     
     # install vscode (dnf)
