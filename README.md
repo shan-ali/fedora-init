@@ -1,17 +1,17 @@
 # fedora-init
 
-# install prereqs
+## Install prereqs
 
 ```
 sudo dnf -y update
 ```
 
-# reboot the system
+## Reboot the system
 
-# run ansible playbook
+## Run ansible playbook
 
 ```
 sudo ansible-playbook fedora_init.yaml
 ```
 
-# reboot the system
+## Reboot the system
