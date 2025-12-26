@@ -9,6 +9,12 @@
     - name: Set Fedora version variable
       set_fact:
         fedora_version: "{{ ansible_distribution_version }}"
+    
+    - name: Detect PCI devices
+      ansible.builtin.command: lspci
+      register: lspci_output
+      changed_when: false
+      failed_when: false
 
     # https://rpmfusion.org/Configuration    
     - name: Install Free and Nonfree Repositories for RPM Fusion
@@ -28,6 +34,7 @@
           - xorg-x11-drv-nvidia-power # for suspend
           - libva-nvidia-driver # hardware accelerated codec
         state: present
+      when: "'NVIDIA' in lspci_output.stdout"
 
     - name: Enable nvidia-{suspend,resume,hibernate} services
       ansible.builtin.systemd:
@@ -37,6 +44,7 @@
         - suspend
         - resume
         - hibernate
+      when: "'NVIDIA' in lspci_output.stdout"
 
     # install codecs
     # https://rpmfusion.org/Howto/Multimedia
@@ -73,8 +81,20 @@
           - tk-devel
           - libuuid-devel
           # others
-          - nvtop
           - gnome-tweaks
+          - ffmpegthumbnailer
+        state: present
+
+    # remove packages (dnf)
+    - name: Remove packages with dnf
+      dnf:
+        name:
+          - gnome-tour
+          - gnome-contacts
+          - gnome-maps
+          - gnome-weather
+          - yelp # help
+          - simple-scan # document scanner
         state: present
     
     # install vscode (dnf)
