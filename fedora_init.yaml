@@ -6,9 +6,14 @@
   vars:
     pyenv_root: "{{ ansible_env.HOME }}/.pyenv"
   tasks:
-    - name: Set Fedora version variable
-      set_fact:
-        fedora_version: "{{ ansible_distribution_version }}"
+  
+    - name: Run rpm command to get Fedora version
+      command: rpm -E %fedora
+      register: fedora_version
+
+    - name: Display the Fedora version
+      debug:
+        msg: "Fedora version is {{ fedora_version.stdout }}"
     
     - name: Detect PCI devices
       ansible.builtin.command: lspci
