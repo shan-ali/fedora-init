@@ -100,7 +100,7 @@
           - gnome-weather
           - yelp # help
           - simple-scan # document scanner
-        state: present
+        state: absent
     
     # install vscode (dnf)
     - name: Add Microsoft GPG key
