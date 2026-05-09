@@ -5,6 +5,7 @@
   become: yes
   vars:
     pyenv_root: "{{ ansible_env.HOME }}/.pyenv"
+    current_user_name: "shan"
   tasks:
   
     - name: Run rpm command to get Fedora version
@@ -264,6 +265,12 @@
       command:
         cmd: nvidia-ctk runtime configure --runtime=docker
       when: "'NVIDIA' in lspci_output.stdout"
+    
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ current_user_name }}"
+        groups: docker
+        append: yes
 
     - name: Enable and restart Docker
       systemd:
