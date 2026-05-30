@@ -1,0 +1,156 @@
+# dev packages
+- name: Install dev packages with dnf
+  dnf:
+    name:
+      - android-tools
+      - gcc
+      - make
+      - zlib-devel
+      - bzip2
+      - bzip2-devel
+      - readline-devel
+      - sqlite
+      - sqlite-devel
+      - openssl-devel
+      - xz
+      - xz-devel
+      - libffi-devel
+      - findutils
+      - tk-devel
+      - libuuid-devel
+    state: present
+
+# install pyenv
+- name: Remove any existing pyenv installation
+  file:
+    path: "{{ pyenv_root }}"
+    state: absent
+
+- name: Install pyenv via official installer
+  shell: "curl -fsSL https://pyenv.run | bash"
+  args:
+    executable: /bin/bash
+
+- name: Ensure pyenv root is exported in .bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PYENV_ROOT="{{ pyenv_root }}"'
+    create: yes
+
+- name: Add pyenv bin to PATH in .bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"'
+    create: yes
+
+- name: Initialize pyenv in .bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'eval "$(pyenv init - bash)"'
+    create: yes
+
+- name: Ensure pyenv root is exported in .bash_profile
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    line: 'export PYENV_ROOT="{{ pyenv_root }}"'
+    create: yes
+
+- name: Add pyenv bin to PATH in .bash_profile
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    line: '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"'
+    create: yes
+
+- name: Initialize pyenv in .bash_profile
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    line: 'eval "$(pyenv init - bash)"'
+    create: yes
+
+- name: Reload shell to apply changes
+  shell: exec "$SHELL"
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+# install uv
+- name: Run uv standalone installer
+  shell: "curl -LsSf https://astral.sh/uv/install.sh | sh"
+  args:
+    executable: /bin/bash
+  register: uv_installer
+  changed_when: uv_installer.rc == 0 and "'uv' installed" in uv_installer.stdout
+
+- name: Fail if uv installer returned an error
+  fail:
+    msg: "uv installation failed: {{ uv_installer.stderr }}"
+  when: uv_installer.rc != 0
+
+- name: Ensure ~/.local/bin exists
+  file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+- name: Add ~/.local/bin to PATH in .bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    create: yes
+    state: present
+
+- name: Enable uv bash completion
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: 'eval "$(uv generate-shell-completion bash)"'
+    create: yes
+    state: present
+
+# install docker
+# https://docs.docker.com/engine/install/fedora/
+- name: Add Docker repository
+  command:
+    cmd: dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+
+- name: Install Docker packages
+  dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Add NVIDIA Container Toolkit repository
+  get_url:
+    url: https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
+    dest: /etc/yum.repos.d/nvidia-container-toolkit.repo
+    mode: '0644'
+  when: "'NVIDIA' in lspci_output.stdout"
+
+- name: Install NVIDIA container toolkit
+  dnf:
+    name:
+      - nvidia-container-toolkit
+    state: present
+  when: "'NVIDIA' in lspci_output.stdout"
+
+- name: Configure NVIDIA runtime for Docker
+  command:
+    cmd: nvidia-ctk runtime configure --runtime=docker
+  when: "'NVIDIA' in lspci_output.stdout"
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ current_user_name }}"
+    groups: docker
+    append: yes
+
+- name: Enable and restart Docker
+  systemd:
+    name: docker
+    enabled: true
+    state: restarted

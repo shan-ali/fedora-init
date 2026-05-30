@@ -1,0 +1,79 @@
+# install packages (dnf)
+- name: Install packages with dnf
+  dnf:
+    name:
+      - gnome-tweaks
+      - ffmpegthumbnailer
+      - libreoffice-writer
+      - libreoffice-calc
+      - vlc
+    state: present
+
+# remove packages (dnf)
+- name: Remove packages with dnf
+  dnf:
+    name:
+      - gnome-tour
+      - gnome-contacts
+      - gnome-maps
+      - gnome-weather
+      - yelp
+      # - simple-scan # document scanner
+    state: absent
+
+# install vscode
+# https://code.visualstudio.com/docs/setup/linux
+- name: Add Microsoft GPG key
+  rpm_key:
+    key: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add VS Code repository
+  copy:
+    dest: /etc/yum.repos.d/vscode.repo
+    content: |
+      [code]
+      name=Visual Studio Code
+      baseurl=https://packages.microsoft.com/yumrepos/vscode
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+
+- name: Install Visual Studio Code
+  dnf:
+    name: code
+    state: present
+
+# install brave origin browser
+# https://brave.com/linux/
+- name: Add Brave browser beta repository
+  command:
+    cmd: dnf config-manager --add-repo https://brave-browser-rpm-beta.s3.brave.com/brave-browser-beta.repo
+  args:
+    creates: /etc/yum.repos.d/brave-browser-beta.repo
+
+- name: Install Brave Origin browser
+  dnf:
+    name: brave-origin-beta
+    state: present
+
+# install flatpaks
+- name: Add the Flathub flatpak remote (system-wide)
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: system
+
+- name: Install applications with flatpak
+  community.general.flatpak:
+    name:
+      - com.spotify.Client
+      - org.gimp.GIMP
+      - io.mpv.Mpv
+      - com.github.tchx84.Flatseal
+      - org.gnome.Extensions
+      - it.mq1.TinyWiiBackupManager
+      - net.pcsx2.PCSX2
+      - com.github.qarmin.czkawka
+    state: present

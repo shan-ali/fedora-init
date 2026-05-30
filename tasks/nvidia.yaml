@@ -1,0 +1,28 @@
+# install nvidia drivers
+# https://idroot.us/install-nvidia-drivers-fedora-42/
+- name: Install NVIDIA drivers
+  dnf:
+    name:
+      - akmod-nvidia
+      - xorg-x11-drv-nvidia-cuda
+      - xorg-x11-drv-nvidia-power # for suspend
+      - libva-nvidia-driver # hardware accelerated codec
+    state: present
+  when: "'NVIDIA' in lspci_output.stdout"
+
+- name: Install nvtop
+  dnf:
+    name: nvtop
+    state: present
+  when: "'NVIDIA' in lspci_output.stdout"
+
+- name: Enable nvidia-{suspend,resume,hibernate} services
+  ansible.builtin.systemd:
+    name: "nvidia-{{ item }}.service"
+    enabled: yes
+  loop:
+    - suspend
+    - resume
+    - hibernate
+  when: "'NVIDIA' in lspci_output.stdout"
+
