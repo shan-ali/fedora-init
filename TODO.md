@@ -1,0 +1,3 @@
+- backup and restore gnome setting 
+- install gnome extensions # not fully working, might need to be a seperate .sh file
+- 

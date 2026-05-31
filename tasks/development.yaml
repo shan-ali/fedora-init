@@ -30,54 +30,75 @@
   shell: "curl -fsSL https://pyenv.run | bash"
   args:
     executable: /bin/bash
+  become_user: "{{ current_user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+    PYENV_ROOT: "{{ pyenv_root }}"
 
 - name: Ensure pyenv root is exported in .bashrc
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ user_home }}/.bashrc"
     line: 'export PYENV_ROOT="{{ pyenv_root }}"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Add pyenv bin to PATH in .bashrc
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ user_home }}/.bashrc"
     line: '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Initialize pyenv in .bashrc
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ user_home }}/.bashrc"
     line: 'eval "$(pyenv init - bash)"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Ensure pyenv root is exported in .bash_profile
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bash_profile"
+    path: "{{ user_home }}/.bash_profile"
     line: 'export PYENV_ROOT="{{ pyenv_root }}"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Add pyenv bin to PATH in .bash_profile
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bash_profile"
+    path: "{{ user_home }}/.bash_profile"
     line: '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Initialize pyenv in .bash_profile
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bash_profile"
+    path: "{{ user_home }}/.bash_profile"
     line: 'eval "$(pyenv init - bash)"'
     create: yes
+  become_user: "{{ current_user_name }}"
 
 - name: Reload shell to apply changes
   shell: exec "$SHELL"
   args:
     executable: /bin/bash
+  become_user: "{{ current_user_name }}"
   changed_when: false
 
 # install uv
+- name: Ensure ~/.local/bin exists
+  file:
+    path: "{{ user_home }}/.local/bin"
+    state: directory
+    mode: '0755'
+  become_user: "{{ current_user_name }}"
+
 - name: Run uv standalone installer
   shell: "curl -LsSf https://astral.sh/uv/install.sh | sh"
   args:
     executable: /bin/bash
+  become_user: "{{ current_user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
   register: uv_installer
   changed_when: uv_installer.rc == 0 and "'uv' installed" in uv_installer.stdout
 
@@ -86,25 +107,21 @@
     msg: "uv installation failed: {{ uv_installer.stderr }}"
   when: uv_installer.rc != 0
 
-- name: Ensure ~/.local/bin exists
-  file:
-    path: "{{ ansible_env.HOME }}/.local/bin"
-    state: directory
-    mode: '0755'
-
 - name: Add ~/.local/bin to PATH in .bashrc
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ user_home }}/.bashrc"
     line: 'export PATH="$HOME/.local/bin:$PATH"'
     create: yes
     state: present
+  become_user: "{{ current_user_name }}"
 
 - name: Enable uv bash completion
   lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ user_home }}/.bashrc"
     line: 'eval "$(uv generate-shell-completion bash)"'
     create: yes
     state: present
+  become_user: "{{ current_user_name }}"
 
 # install docker
 # https://docs.docker.com/engine/install/fedora/

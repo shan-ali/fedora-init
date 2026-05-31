@@ -3,9 +3,11 @@
   hosts: localhost
   connection: local
   become: yes
+  gather_facts: no
   vars:
-    pyenv_root: "{{ ansible_env.HOME }}/.pyenv"
     current_user_name: "shan"
+    user_home: "/home/{{ current_user_name }}"
+    pyenv_root: "{{ user_home }}/.pyenv"
   tasks:
 
     - name: Run rpm command to get Fedora version
@@ -28,22 +30,6 @@
         state: present
 
     # https://rpmfusion.org/Configuration
-    - name: Install distribution-gpg-keys package
-      ansible.builtin.dnf:
-        name: distribution-gpg-keys
-        state: present
-
-    - name: Import RPM Fusion GPG key
-      ansible.builtin.rpm_key:
-        state: present
-        key: "/usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-{{ ansible_distribution_major_version }}"
-
-    - name: Install RPM Fusion free release package
-      ansible.builtin.dnf:
-        name: "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
-        state: present
-        disable_gpg_check: false
-
     - name: Install Free and Nonfree Repositories for RPM Fusion
       dnf:
         name:

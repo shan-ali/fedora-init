@@ -7,6 +7,7 @@
       - libreoffice-writer
       - libreoffice-calc
       - vlc
+      - python3-pip
     state: present
 
 # remove packages (dnf)
@@ -84,3 +85,24 @@
       - net.pcsx2.PCSX2
       - com.github.qarmin.czkawka
     state: present
+
+- name: Install gnome-extensions-cli
+  ansible.builtin.pip:
+    name: gnome-extensions-cli
+    state: latest
+    executable: pip3
+    extra_args: --user
+  become_user: "{{ current_user_name }}"
+
+- name: Install GNOME extensions
+  ansible.builtin.command:
+    cmd: "{{ user_home }}/.local/bin/gext install {{ item }}"
+  loop:
+    - dash-to-dock@micxgx.gmail.com
+    - randomwallpaper@iflow.space
+    - blur-my-shell@aunetx
+    - accent-directories@taiwbi.com
+  become_user: "{{ current_user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  changed_when: false
