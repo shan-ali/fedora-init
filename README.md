@@ -61,6 +61,11 @@ Developer toolchain setup:
 sudo dnf -y update
 ```
 
+```
+sudo dnf install ansible-playbook -y
+sudo ansible-galaxy collection install community.general
+```
+
 Then reboot before running the playbook so the updated kernel is active.
 
 ## Run
