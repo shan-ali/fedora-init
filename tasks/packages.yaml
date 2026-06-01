@@ -19,6 +19,11 @@
       - gnome-maps
       - gnome-weather
       - yelp
+      - gnome-fonts
+      - gnome-characters
+      - gnome-connections
+      - gnome-boxes
+      - mediawriter 
       # - simple-scan # document scanner
     state: absent
 

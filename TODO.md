@@ -1,3 +1,6 @@
 - backup and restore gnome setting 
+- backup gnome shell extension settings?
 - install gnome extensions # not fully working, might need to be a seperate .sh file
-- 
+- backup browser settings (brave, firefox)
+- enable ublock origin content filtering for yt-shorts and yt-playables
+
