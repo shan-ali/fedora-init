@@ -19,6 +19,7 @@
       - tk-devel
       - libuuid-devel
     state: present
+  become: yes
 
 # install pyenv
 - name: Remove any existing pyenv installation

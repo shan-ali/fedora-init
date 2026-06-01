@@ -1,0 +1,19 @@
+# install brave origin browser
+# https://brave.com/linux/    
+- name: Add Brave Beta repository
+  ansible.builtin.get_url:
+    url: https://brave-browser-rpm-beta.s3.brave.com/brave-browser-beta.repo
+    dest: /etc/yum.repos.d/brave-browser-beta.repo
+    mode: "0644"
+  become: true
+
+- name: Refresh DNF cache
+  ansible.builtin.dnf:
+    update_cache: true
+  become: true
+
+- name: Install Brave Origin browser
+  dnf:
+    name: brave-origin-beta
+    state: present
+  become: true

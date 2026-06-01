@@ -1,0 +1,20 @@
+- name: Install gnome-extensions-cli
+  ansible.builtin.pip:
+    name: gnome-extensions-cli
+    state: latest
+    executable: pip3
+    extra_args: --user
+  become_user: "{{ current_user_name }}"
+
+- name: Install GNOME extensions
+  ansible.builtin.command:
+    cmd: "{{ user_home }}/.local/bin/gext --filesystem install {{ item }}"
+  loop:
+    - dash-to-dock@micxgx.gmail.com
+    - randomwallpaper@iflow.space
+    - blur-my-shell@aunetx
+    - accent-directories@taiwbi.com
+  become_user: "{{ current_user_name }}"
+  environment:
+    HOME: "{{ user_home }}"
+  changed_when: false

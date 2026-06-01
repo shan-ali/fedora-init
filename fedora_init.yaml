@@ -2,21 +2,17 @@
 - name: Initialize Fedora Workstation
   hosts: localhost
   connection: local
-  become: yes
-  gather_facts: no
+  gather_facts: yes
+  become: no
   vars:
     current_user_name: "shan"
     user_home: "/home/{{ current_user_name }}"
     pyenv_root: "{{ user_home }}/.pyenv"
   tasks:
 
-    - name: Run rpm command to get Fedora version
-      command: rpm -E %fedora
-      register: fedora_version
-
     - name: Display the Fedora version
       debug:
-        msg: "Fedora version is {{ fedora_version.stdout }}"
+        msg: "{{ ansible_facts['distribution_major_version'] }}"
 
     - name: Detect PCI devices
       ansible.builtin.command: lspci
@@ -28,27 +24,22 @@
       dnf:
         name: dnf-plugins-core
         state: present
+      become: yes
 
+    # install RPM Fusion repositories
     # https://rpmfusion.org/Configuration
     - name: Install Free and Nonfree Repositories for RPM Fusion
       dnf:
         name:
-          - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ fedora_version.stdout }}.noarch.rpm
-          - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ fedora_version.stdout }}.noarch.rpm
+          - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
+          - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
         state: present
+      become: yes
 
-    # install codecs
-    # https://rpmfusion.org/Howto/Multimedia
-    - name: Swap ffmpeg-free with ffmpeg
-      ansible.builtin.command:
-        cmd: dnf swap ffmpeg-free ffmpeg --allowerasing -y
-      become: true
-
-    - name: Update multimedia group without weak deps and excluding PackageKit-gstreamer-plugin
-      ansible.builtin.command:
-        cmd: dnf update @multimedia --setopt=install_weak_deps=False --exclude=PackageKit-gstreamer-plugin -y
-      become: true
-
+    - import_tasks: tasks/codecs.yaml
     - import_tasks: tasks/nvidia.yaml
     - import_tasks: tasks/packages.yaml
-    - import_tasks: tasks/development.yaml
+    - import_tasks: tasks/vscode.yaml
+    - import_tasks: tasks/brave.yaml
+    # - import_tasks: tasks/development.yaml
+    # - import_tasks: tasks/gnome.yaml

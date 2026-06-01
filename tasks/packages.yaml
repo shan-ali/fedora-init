@@ -9,6 +9,7 @@
       - vlc
       - python3-pip
     state: present
+  become: yes
 
 # remove packages (dnf)
 - name: Remove packages with dnf
@@ -26,57 +27,16 @@
       - mediawriter 
       # - simple-scan # document scanner
     state: absent
-
-# install vscode
-# https://code.visualstudio.com/docs/setup/linux
-- name: Add Microsoft GPG key
-  rpm_key:
-    key: https://packages.microsoft.com/keys/microsoft.asc
-    state: present
-
-- name: Add VS Code repository
-  copy:
-    dest: /etc/yum.repos.d/vscode.repo
-    content: |
-      [code]
-      name=Visual Studio Code
-      baseurl=https://packages.microsoft.com/yumrepos/vscode
-      enabled=1
-      gpgcheck=1
-      gpgkey=https://packages.microsoft.com/keys/microsoft.asc
-
-- name: Install Visual Studio Code
-  dnf:
-    name: code
-    state: present
-    update_cache: true
-
-# install brave origin browser
-# https://brave.com/linux/    
-- name: Add Brave Beta repository
-  ansible.builtin.get_url:
-    url: https://brave-browser-rpm-beta.s3.brave.com/brave-browser-beta.repo
-    dest: /etc/yum.repos.d/brave-browser-beta.repo
-    mode: "0644"
-  become: true
-
-- name: Refresh DNF cache
-  ansible.builtin.dnf:
-    update_cache: true
-  become: true
-
-- name: Install Brave Origin browser
-  dnf:
-    name: brave-origin-beta
-    state: present
+  become: yes
 
 # install flatpaks   
-- name: Add the Flathub flatpak remote to the system installation
+- name: Add the Flathub flatpak remote repository
   community.general.flatpak_remote:
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
     method: system
+  become: yes
 
 - name: Install applications with flatpak
   community.general.flatpak:
@@ -91,23 +51,3 @@
       - com.github.qarmin.czkawka
     state: present
 
-- name: Install gnome-extensions-cli
-  ansible.builtin.pip:
-    name: gnome-extensions-cli
-    state: latest
-    executable: pip3
-    extra_args: --user
-  become_user: "{{ current_user_name }}"
-
-- name: Install GNOME extensions
-  ansible.builtin.command:
-    cmd: "{{ user_home }}/.local/bin/gext install {{ item }}"
-  loop:
-    - dash-to-dock@micxgx.gmail.com
-    - randomwallpaper@iflow.space
-    - blur-my-shell@aunetx
-    - accent-directories@taiwbi.com
-  become_user: "{{ current_user_name }}"
-  environment:
-    HOME: "{{ user_home }}"
-  changed_when: false

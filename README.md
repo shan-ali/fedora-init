@@ -71,7 +71,7 @@ Then reboot before running the playbook so the updated kernel is active.
 ## Run
 
 ```
-sudo ansible-playbook fedora_init.yaml
+ansible-playbook fedora_init.yaml --ask-become-pass
 ```
 
 Reboot after the playbook completes (required for NVIDIA drivers and group membership changes to take effect).
