@@ -1,13 +1,13 @@
 # install vscode
 # https://code.visualstudio.com/docs/setup/linux
 - name: Add Microsoft GPG key
-  rpm_key:
+  ansible.builtin.rpm_key:
     key: https://packages.microsoft.com/keys/microsoft.asc
     state: present
-  become: yes
+  become: true
 
 - name: Add VS Code repository
-  copy:
+  ansible.builtin.copy:
     dest: /etc/yum.repos.d/vscode.repo
     content: |
       [code]
@@ -16,11 +16,11 @@
       enabled=1
       gpgcheck=1
       gpgkey=https://packages.microsoft.com/keys/microsoft.asc
-  become: yes
+  become: true
 
 - name: Install Visual Studio Code
-  dnf:
+  ansible.builtin.dnf:
     name: code
     state: present
     update_cache: true
-  become: yes
+  become: true

@@ -6,11 +6,17 @@ Ansible playbook to automate setting up a Fedora workstation from scratch.
 
 ```
 fedora-init/
+├── ansible.cfg
+├── hosts.yaml
 ├── fedora_init.yaml     # main playbook — system-level setup and entry point
 └── tasks/
-    ├── nvidia.yaml      # NVIDIA drivers, services, and nvtop
-    ├── packages.yaml    # user-facing apps: dnf packages, VS Code, Brave, flatpaks
-    └── development.yaml # developer tools: build deps, pyenv, uv, Docker
+    ├── codecs.yaml          # ffmpeg swap and multimedia codec group
+    ├── nvidia.yaml          # NVIDIA drivers, services, and nvtop
+    ├── packages.yaml        # dnf packages, flatpaks, gnome-extensions-cli
+    ├── vscode.yaml          # Visual Studio Code
+    ├── brave.yaml           # Brave Origin browser
+    ├── gnome-extensions.yaml # GNOME shell extensions via gext
+    └── development.yaml     # build deps, pyenv, uv, Docker
 ```
 
 ### fedora_init.yaml
@@ -20,9 +26,13 @@ The main playbook handles foundational system setup that everything else depends
 - Installs `dnf-plugins-core` (required by both Brave and Docker repo setup)
 - Detects the Fedora version and whether an NVIDIA GPU is present
 - Enables RPM Fusion (free + nonfree) repositories
-- Swaps `ffmpeg-free` for `ffmpeg` and updates the multimedia codec group
+- Delegates all other setup to task files via `ansible.builtin.import_tasks`
+- Defines the `Restart Docker` handler used by the NVIDIA container toolkit configuration
 
-It then delegates to the task files via `import_tasks`.
+### tasks/codecs.yaml
+
+- Swaps `ffmpeg-free` for `ffmpeg` (skipped if already swapped)
+- Updates the multimedia codec group
 
 ### tasks/nvidia.yaml
 
@@ -37,22 +47,40 @@ All NVIDIA-related setup, skipped automatically on non-NVIDIA systems:
 General application installs and removals:
 
 - Installs `gnome-tweaks`, `ffmpegthumbnailer`, `vlc`, `libreoffice-writer`, `libreoffice-calc`
-- Removes unwanted GNOME apps (tour, contacts, maps, weather, help)
-- Installs Visual Studio Code (via Microsoft repo)
-- Installs Brave Origin browser (via Brave beta repo)
-- Adds Flathub and installs flatpak apps:
-  - Spotify, GIMP, mpv, Flatseal, GNOME Extensions
-  - Tiny Wii Backup Manager, PCSX2, Czkawka
+- Removes unwanted GNOME apps (tour, contacts, maps, weather, help, and others)
+- Adds Flathub and installs flatpak apps: Spotify, GIMP, mpv, Flatseal, GNOME Extensions, Tiny Wii Backup Manager, PCSX2, Czkawka
+- Installs `gnome-extensions-cli` (`gext`) via pip for the current user
+
+### tasks/vscode.yaml
+
+- Adds the Microsoft GPG key and yum repository
+- Installs Visual Studio Code
+
+### tasks/brave.yaml
+
+- Adds the Brave Beta yum repository
+- Installs Brave Origin browser
+
+### tasks/gnome-extensions.yaml
+
+Installs GNOME shell extensions via `gext install`:
+
+- `dash-to-dock@micxgx.gmail.com`
+- `randomwallpaper@iflow.space`
+- `blur-my-shell@aunetx`
+- `accent-directories@taiwbi.com`
+
+> **Note:** `gext install` also attempts to enable extensions, which requires a running GNOME session. If run before first login, install succeeds but enabling may fail silently. Re-run or enable manually with `gext enable <uuid>` after logging in.
 
 ### tasks/development.yaml
 
 Developer toolchain setup:
 
 - Installs C/Python build dependencies (`gcc`, `make`, `*-devel` packages, etc.)
-- Installs [pyenv](https://github.com/pyenv/pyenv) and configures it in `.bashrc` and `.bash_profile`
+- Installs [pyenv](https://github.com/pyenv/pyenv) (skipped if already installed), runs `pyenv update`, and configures it in `.bashrc` and `.bash_profile`
 - Installs [uv](https://github.com/astral-sh/uv) and configures shell completion
 - Installs Docker CE and (if NVIDIA detected) the NVIDIA Container Toolkit
-- Configures the NVIDIA runtime for Docker (if NVIDIA detected)
+- Configures the NVIDIA runtime for Docker and triggers a Docker restart via handler
 - Adds the current user to the `docker` group
 
 ## Prerequisites
@@ -62,13 +90,15 @@ sudo dnf -y update
 ```
 
 ```
-sudo dnf install ansible-playbook -y
-sudo ansible-galaxy collection install community.general
+sudo dnf install ansible -y
+ansible-galaxy collection install community.general
 ```
 
 Then reboot before running the playbook so the updated kernel is active.
 
 ## Run
+
+> [!CAUTION] DO NOT RUN AS ROOT
 
 ```
 ansible-playbook fedora_init.yaml --ask-become-pass

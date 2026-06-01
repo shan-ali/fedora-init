@@ -1,14 +1,22 @@
 # install codecs
 # https://rpmfusion.org/Howto/Multimedia
+- name: Check if ffmpeg-free is installed
+  ansible.builtin.command:
+    cmd: rpm -q ffmpeg-free
+  register: ffmpeg_free_check
+  changed_when: false
+  failed_when: false
+
 - name: Swap ffmpeg-free with ffmpeg
   ansible.builtin.command:
     cmd: dnf swap ffmpeg-free ffmpeg --allowerasing -y
   become: true
+  when: ffmpeg_free_check.rc == 0
 
 - name: Update multimedia package group
-  dnf:
+  ansible.builtin.dnf:
     name: "@multimedia"
     state: latest
     install_weak_deps: false
     exclude: PackageKit-gstreamer-plugin
-  become: yes
+  become: true

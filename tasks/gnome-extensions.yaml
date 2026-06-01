@@ -4,17 +4,16 @@
     state: latest
     executable: pip3
     extra_args: --user
-  become_user: "{{ current_user_name }}"
 
 - name: Install GNOME extensions
   ansible.builtin.command:
-    cmd: "{{ user_home }}/.local/bin/gext --filesystem install {{ item }}"
+    cmd: "{{ ansible_facts['user_dir'] }}/.local/bin/gext install {{ item }}"
   loop:
     - dash-to-dock@micxgx.gmail.com
     - randomwallpaper@iflow.space
     - blur-my-shell@aunetx
     - accent-directories@taiwbi.com
-  become_user: "{{ current_user_name }}"
+    - clipboard-indicator@tudmotu.com
   environment:
-    HOME: "{{ user_home }}"
+    HOME: "{{ ansible_facts['user_dir'] }}"
   changed_when: false

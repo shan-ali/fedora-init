@@ -1,6 +1,6 @@
 # install packages (dnf)
 - name: Install packages with dnf
-  dnf:
+  ansible.builtin.dnf:
     name:
       - gnome-tweaks
       - ffmpegthumbnailer
@@ -9,11 +9,11 @@
       - vlc
       - python3-pip
     state: present
-  become: yes
+  become: true
 
 # remove packages (dnf)
 - name: Remove packages with dnf
-  dnf:
+  ansible.builtin.dnf:
     name:
       - gnome-tour
       - gnome-contacts
@@ -24,19 +24,19 @@
       - gnome-characters
       - gnome-connections
       - gnome-boxes
-      - mediawriter 
+      - mediawriter
       # - simple-scan # document scanner
     state: absent
-  become: yes
+  become: true
 
-# install flatpaks   
+# install flatpaks
 - name: Add the Flathub flatpak remote repository
   community.general.flatpak_remote:
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
     method: system
-  become: yes
+  become: true
 
 - name: Install applications with flatpak
   community.general.flatpak:
@@ -51,3 +51,9 @@
       - com.github.qarmin.czkawka
     state: present
 
+- name: Install gnome-extensions-cli
+  ansible.builtin.pip:
+    name: gnome-extensions-cli
+    state: latest
+    executable: pip3
+    extra_args: --user

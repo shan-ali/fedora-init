@@ -2,16 +2,19 @@
 - name: Initialize Fedora Workstation
   hosts: localhost
   connection: local
-  gather_facts: yes
-  become: no
-  vars:
-    current_user_name: "shan"
-    user_home: "/home/{{ current_user_name }}"
-    pyenv_root: "{{ user_home }}/.pyenv"
+  gather_facts: true
+  become: false
+  handlers:
+    - name: Restart Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+      become: true
+
   tasks:
 
     - name: Display the Fedora version
-      debug:
+      ansible.builtin.debug:
         msg: "{{ ansible_facts['distribution_major_version'] }}"
 
     - name: Detect PCI devices
@@ -21,25 +24,25 @@
       failed_when: false
 
     - name: Install dnf-plugins-core
-      dnf:
+      ansible.builtin.dnf:
         name: dnf-plugins-core
         state: present
-      become: yes
+      become: true
 
     # install RPM Fusion repositories
     # https://rpmfusion.org/Configuration
     - name: Install Free and Nonfree Repositories for RPM Fusion
-      dnf:
+      ansible.builtin.dnf:
         name:
           - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
           - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm
         state: present
-      become: yes
+      become: true
 
-    - import_tasks: tasks/codecs.yaml
-    - import_tasks: tasks/nvidia.yaml
-    - import_tasks: tasks/packages.yaml
-    - import_tasks: tasks/vscode.yaml
-    - import_tasks: tasks/brave.yaml
-    # - import_tasks: tasks/development.yaml
-    # - import_tasks: tasks/gnome.yaml
+    - ansible.builtin.import_tasks: tasks/codecs.yaml
+    - ansible.builtin.import_tasks: tasks/nvidia.yaml
+    - ansible.builtin.import_tasks: tasks/packages.yaml
+    - ansible.builtin.import_tasks: tasks/vscode.yaml
+    - ansible.builtin.import_tasks: tasks/brave.yaml
+    - ansible.builtin.import_tasks: tasks/development.yaml
+    - ansible.builtin.import_tasks: tasks/gnome-extensions.yaml
