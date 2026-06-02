@@ -15,6 +15,7 @@ fedora-init/
     ├── packages.yaml        # dnf packages, flatpaks, gnome-extensions-cli
     ├── vscode.yaml          # Visual Studio Code
     ├── brave.yaml           # Brave Origin browser
+    ├── fonts.yaml           # Microsoft Core Fonts
     ├── gnome-extensions.yaml # GNOME shell extensions via gext
     └── development.yaml     # build deps, pyenv, uv, Docker
 ```
@@ -60,6 +61,12 @@ General application installs and removals:
 
 - Adds the Brave Beta yum repository
 - Installs Brave Origin browser
+
+### tasks/fonts.yaml
+
+- Installs font tooling dependencies (`curl`, `cabextract`, `xorg-x11-font-utils`, `mkfontscale`, `fontconfig`, `cpio`, `unzip`)
+- Downloads the `msttcore-fonts-installer` RPM from SourceForge and verifies its SHA256 checksum
+- Installs the RPM with `--nodigest --nofiledigest` (required because this 2013 community package lacks the digest metadata DNF5 expects); skipped if already installed
 
 ### tasks/gnome-extensions.yaml
 
