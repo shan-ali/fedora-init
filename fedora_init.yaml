@@ -44,5 +44,6 @@
     - ansible.builtin.import_tasks: tasks/packages.yaml
     - ansible.builtin.import_tasks: tasks/vscode.yaml
     - ansible.builtin.import_tasks: tasks/brave.yaml
+    - ansible.builtin.import_tasks: tasks/fonts.yaml
     - ansible.builtin.import_tasks: tasks/development.yaml
     - ansible.builtin.import_tasks: tasks/gnome-extensions.yaml

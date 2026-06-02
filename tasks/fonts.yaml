@@ -1,0 +1,32 @@
+# install microsoft fonts
+- name: Install Microsoft fonts dependencies
+  ansible.builtin.dnf:
+    name:
+      - curl
+      - cabextract
+      - xorg-x11-font-utils
+      - mkfontscale
+      - fontconfig
+      - cpio
+      - unzip
+    state: present
+  become: true
+
+- name: Download msttcore-fonts-installer RPM
+  ansible.builtin.get_url:
+    url: https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm
+    dest: /tmp/msttcore-fonts-installer-2.6-1.noarch.rpm
+    checksum: sha256:55d7f3a86533225634ff3ea2384b4356d9665a29cc7eeacff16602a1714afbb4
+
+- name: Check if msttcore-fonts-installer is already installed
+  ansible.builtin.command:
+    cmd: rpm -q msttcore-fonts-installer
+  register: msttcore_check
+  changed_when: false
+  failed_when: false
+
+- name: Install msttcore-fonts-installer
+  ansible.builtin.command:
+    cmd: rpm -ivh --nodigest --nofiledigest /tmp/msttcore-fonts-installer-2.6-1.noarch.rpm
+  become: true
+  when: msttcore_check.rc != 0
