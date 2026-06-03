@@ -39,6 +39,22 @@
         state: present
       become: true
 
+    - name: Add updateall function to .bashrc
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_facts['user_dir'] }}/.bashrc"
+        marker: "# {mark} updateall"
+        block: |
+          updateall() {
+              echo -e "\e[36mUpdating DNF packages...\e[0m"
+              sudo dnf update -y
+              echo -e "\e[36mUpdating Flatpak packages...\e[0m"
+              flatpak update -y
+              echo -e "\e[36mUpdating GNOME Extensions...\e[0m"
+              gext update
+          }
+        prepend_newline: true
+        create: true
+
     - ansible.builtin.import_tasks: tasks/codecs.yaml
     - ansible.builtin.import_tasks: tasks/nvidia.yaml
     - ansible.builtin.import_tasks: tasks/packages.yaml
