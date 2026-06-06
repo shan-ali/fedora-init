@@ -1,5 +1,5 @@
 # install packages (dnf)
-- name: Install packages with dnf
+- name: Install minimal packages with dnf
   ansible.builtin.dnf:
     name:
       - gnome-tweaks
@@ -7,7 +7,6 @@
       - libreoffice-writer
       - libreoffice-calc
       - vlc
-      - python3-pip
     state: present
   become: true
 
@@ -25,6 +24,9 @@
       - gnome-connections
       - gnome-boxes
       - mediawriter
+      - totem # gnome's default video player
+      - showtime # gnome's default audio player
+      - malcontent # parental content
       # - simple-scan # document scanner
     state: absent
   become: true
@@ -38,22 +40,21 @@
     method: system
   become: true
 
-- name: Install applications with flatpak
+- name: Install minimal applications with flatpak
   community.general.flatpak:
     name:
       - com.spotify.Client
-      - org.gimp.GIMP
-      - io.mpv.Mpv
+      # - io.mpv.Mpv
       - com.github.tchx84.Flatseal
       - org.gnome.Extensions
+    state: present
+
+- name: Install extra applications with flatpak
+  community.general.flatpak:
+    name:
+      - org.gimp.GIMP
       - it.mq1.TinyWiiBackupManager
       - net.pcsx2.PCSX2
       - com.github.qarmin.czkawka
     state: present
-
-- name: Install gnome-extensions-cli
-  ansible.builtin.pip:
-    name: gnome-extensions-cli
-    state: latest
-    executable: pip3
-    extra_args: --user
+  tags: extras

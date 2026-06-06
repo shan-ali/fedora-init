@@ -12,7 +12,6 @@
       become: true
 
   tasks:
-
     - name: Display the Fedora version
       ansible.builtin.debug:
         msg: "{{ ansible_facts['distribution_major_version'] }}"
@@ -58,8 +57,10 @@
     - ansible.builtin.import_tasks: tasks/codecs.yaml
     - ansible.builtin.import_tasks: tasks/nvidia.yaml
     - ansible.builtin.import_tasks: tasks/packages.yaml
-    - ansible.builtin.import_tasks: tasks/vscode.yaml
     - ansible.builtin.import_tasks: tasks/brave.yaml
     - ansible.builtin.import_tasks: tasks/fonts.yaml
     - ansible.builtin.import_tasks: tasks/development.yaml
+      tags: development
+    - ansible.builtin.import_tasks: tasks/vscode.yaml
+      tags: development
     - ansible.builtin.import_tasks: tasks/gnome-extensions.yaml

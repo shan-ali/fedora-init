@@ -12,7 +12,7 @@ fedora-init/
 └── tasks/
     ├── codecs.yaml          # ffmpeg swap and multimedia codec group
     ├── nvidia.yaml          # NVIDIA drivers, services, and nvtop
-    ├── packages.yaml        # dnf packages, flatpaks, gnome-extensions-cli
+    ├── packages.yaml        # dnf packages, flatpaks (minimal + extras)
     ├── vscode.yaml          # Visual Studio Code
     ├── brave.yaml           # Brave Origin browser
     ├── fonts.yaml           # Microsoft Core Fonts
@@ -49,8 +49,8 @@ General application installs and removals:
 
 - Installs `gnome-tweaks`, `ffmpegthumbnailer`, `vlc`, `libreoffice-writer`, `libreoffice-calc`
 - Removes unwanted GNOME apps (tour, contacts, maps, weather, help, and others)
-- Adds Flathub and installs flatpak apps: Spotify, GIMP, mpv, Flatseal, GNOME Extensions, Tiny Wii Backup Manager, PCSX2, Czkawka
-- Installs `gnome-extensions-cli` (`gext`) via pip for the current user
+- Adds Flathub and installs a minimal set of flatpak apps: Spotify, Flatseal, GNOME Extensions
+- Installs extra flatpak apps tagged `extras` (skippable for a leaner setup): GIMP, Tiny Wii Backup Manager, PCSX2, Czkawka
 
 ### tasks/vscode.yaml
 
@@ -89,6 +89,20 @@ Developer toolchain setup:
 - Installs Docker CE and (if NVIDIA detected) the NVIDIA Container Toolkit
 - Configures the NVIDIA runtime for Docker and triggers a Docker restart via handler
 - Adds the current user to the `docker` group
+
+## Tags
+
+Two tags allow trimming the install for a leaner setup:
+
+- `extras` — optional flatpak apps in `tasks/packages.yaml` (GIMP, Tiny Wii Backup Manager, PCSX2, Czkawka)
+- `development` — everything in `tasks/development.yaml` and `tasks/vscode.yaml` (build deps, pyenv, uv, Docker, VS Code)
+
+Skip either or both with `--skip-tags`:
+
+```
+ansible-playbook fedora_init.yaml --skip-tags extras --ask-become-pass
+ansible-playbook fedora_init.yaml --skip-tags extras,development --ask-become-pass
+```
 
 ## Prerequisites
 
