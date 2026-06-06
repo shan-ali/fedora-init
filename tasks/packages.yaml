@@ -26,7 +26,7 @@
       - mediawriter
       - totem # gnome's default video player
       - showtime # gnome's default audio player
-      - malcontent # parental content
+      - malcontent-control # parental content
       # - simple-scan # document scanner
     state: absent
   become: true
