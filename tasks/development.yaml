@@ -200,3 +200,46 @@
     enabled: true
     state: started
   become: true
+
+# install kubectl
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+- name: Set Kubernetes release series for the package repository
+  ansible.builtin.set_fact:
+    kubernetes_release: v1.36
+
+- name: Add Kubernetes repository
+  ansible.builtin.yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_release }}/rpm/"
+    gpgkey: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_release }}/rpm/repodata/repomd.xml.key"
+    gpgcheck: true
+    enabled: true
+  become: true
+
+- name: Install kubectl
+  ansible.builtin.dnf:
+    name: kubectl
+    state: present
+    update_cache: true
+  become: true
+
+- name: Enable kubectl bash completion
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['user_dir'] }}/.bashrc"
+    line: 'source <(kubectl completion bash)'
+    create: true
+
+# install kind
+# https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+# installed from the release binary, not dnf: the Fedora kind package requires
+# the docker-cli capability, which docker-ce-cli does not provide
+- name: Install kind
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/kind/releases/download/v0.32.0/kind-linux-amd64
+    dest: /usr/local/bin/kind
+    checksum: sha256:50030de23cf40a18505f20426f6a8506bedf13c6e509244bd1fa9463721b0f54
+    owner: root
+    group: root
+    mode: '0755'
+  become: true

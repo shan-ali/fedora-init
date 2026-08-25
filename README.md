@@ -17,7 +17,7 @@ fedora-init/
     ├── brave.yaml           # Brave Origin browser
     ├── fonts.yaml           # Microsoft Core Fonts
     ├── gnome-extensions.yaml # GNOME shell extensions via gext
-    └── development.yaml     # build deps, pyenv, uv, Docker
+    └── development.yaml     # build deps, pyenv, uv, Docker, kubectl, kind
 ```
 
 ### fedora_init.yaml
@@ -89,13 +89,15 @@ Developer toolchain setup:
 - Installs Docker CE and (if NVIDIA detected) the NVIDIA Container Toolkit
 - Configures the NVIDIA runtime for Docker and triggers a Docker restart via handler
 - Adds the current user to the `docker` group
+- Adds the Kubernetes package repository and installs `kubectl` (with bash completion)
+- Installs [kind](https://kind.sigs.k8s.io/) from the upstream release binary into `/usr/local/bin` (the Fedora `kind` package requires `docker-cli`, which `docker-ce-cli` does not provide)
 
 ## Tags
 
 Two tags allow trimming the install for a leaner setup:
 
 - `extras` — optional flatpak apps in `tasks/packages.yaml` (GIMP, Tiny Wii Backup Manager, PCSX2, Czkawka)
-- `development` — everything in `tasks/development.yaml` and `tasks/vscode.yaml` (build deps, pyenv, uv, Docker, VS Code)
+- `development` — everything in `tasks/development.yaml` and `tasks/vscode.yaml` (build deps, pyenv, uv, Docker, kubectl, kind, VS Code)
 
 Skip either or both with `--skip-tags`:
 

@@ -20,6 +20,7 @@
     - randomwallpaper@iflow.space
     - blur-my-shell@aunetx
     - accent-directories@taiwbi.com
+    - auto-accent-colour@Wartybix
   environment:
     HOME: "{{ ansible_facts['user_dir'] }}"
   changed_when: false
