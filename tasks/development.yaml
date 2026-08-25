@@ -230,6 +230,18 @@
     line: 'source <(kubectl completion bash)'
     create: true
 
+- name: Add kubectl alias to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['user_dir'] }}/.bashrc"
+    line: 'alias k=kubectl'
+    create: true
+
+- name: Enable bash completion for the kubectl alias
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['user_dir'] }}/.bashrc"
+    line: 'complete -o default -F __start_kubectl k'
+    create: true
+
 # install kind
 # https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
 # installed from the release binary, not dnf: the Fedora kind package requires
